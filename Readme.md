@@ -107,7 +107,7 @@ build/topo-builder.py -t {topo}
 ```
 To create the necessary scripts and create a bare startup-configuration:
 ```
-build/topo-build.sh -t {topo} -s
+./topo-build.sh -t {topo} -s
 ```
 
 or
