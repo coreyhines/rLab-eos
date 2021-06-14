@@ -1,10 +1,11 @@
 #!/bin/bash
 
-while getopts t: option
+while getopts t:s: option
 do
 case "${option}"
 in
 t) TOPO=${OPTARG};;
+s) FLAG=true;;
 esac
 done
 
@@ -13,7 +14,14 @@ NC='\033[0m'
 
 #topobuilder
 echo -e "${YELLOW}Building topo: $TOPO${NC}\n"
-build/topo-builder.py -t $TOPO
+if [[ $FLAG == true ]];
+then
+  build/topo-builder.py -t $TOPO -s
+else
+  build/topo-builder.py -t $TOPO 
+fi
+
+
 echo -e "${YELLOW}DONE: Building topo: $TOPO${NC}\n"
 
 echo ""
