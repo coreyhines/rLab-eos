@@ -94,15 +94,20 @@ docker build -t chost:{chostimage_tag} build/hosts/.
 3. Create the topology scripts:
 To create the necessary scripts and leverage either no startup-configs or leverage already provided ones:
 ```
-./topo_build.sh -t {topo}
+./topo-build.sh -t {topo}
+```
+
+{topo} is the filename for the topology file located in `topologies/` without the `.yaml` extension. For the L2 topology, the command would look like:
+```
+build/topo-build.sh -t l2
+```
+Note: `topo-build.sh` is a wrapper shell script that calls both `topo-builder.py` and `yamlviz.py`. If the diagram that `yamlviz.py` generates is not needed or to use other arguments to `topo-builder.py`, you can run it directly:
+```
+build/topo-builder.py -t {topo}
 ```
 To create the necessary scripts and create a bare startup-configuration:
 ```
 build/topo-builder.py -t {topo} -s
-```
-{topo} is the filename for the topology file located in `topologies/` without the `.yaml` extension. For the L2 topology, the command would look like:
-```
-build/topo-builder.py -t l2
 ```
 
 4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.  
