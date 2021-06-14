@@ -5,8 +5,8 @@ This repo will contain the data models and configs to build different toplogies 
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
-`build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology to the `topologies/` directory. 
-`build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
+- `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology to the `topologies/` directory. 
+- `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
 - `configs/{topo}/{device}` - This directory structure is were any files you want to be loaded into cEOS-lab's `/mnt/flash` should be loaded to.  Scripts, startup-config etc.
 
 The Following Python package libraries need to be loaded on the machine that will run `topo-builder.py`:
@@ -99,13 +99,19 @@ To create the necessary scripts and leverage either no startup-configs or levera
 
 {topo} is the filename for the topology file located in `topologies/` without the `.yaml` extension. For the L2 topology, the command would look like:
 ```
-build/topo-build.sh -t l2
+topo-build.sh -t l2
 ```
 Note: `topo-build.sh` is a wrapper shell script that calls both `topo-builder.py` and `yamlviz.py`. If the diagram that `yamlviz.py` generates is not needed or to use other arguments to `topo-builder.py`, you can run it directly:
 ```
 build/topo-builder.py -t {topo}
 ```
 To create the necessary scripts and create a bare startup-configuration:
+```
+build/topo-build.sh -t {topo} -s
+```
+
+or
+
 ```
 build/topo-builder.py -t {topo} -s
 ```
