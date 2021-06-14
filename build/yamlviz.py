@@ -6,8 +6,7 @@ from ruamel.yaml import YAML
 import argparse
 
 BASE_PATH = getcwd()
-loop = False
-looped = ""
+looped = []
 
 def openTopo(topo):
     try:
@@ -42,7 +41,7 @@ def create_topo(root, neigh_list):
             _remote = _neigh['neighborDevice'] + _neigh['neighborPort']
             if checkedge_loop(_node['name'], _neigh['neighborDevice']):
                 global looped
-                looped = _node['name']
+                looped.append(_node['name'])
             else:
                 loop = False
             if not checkedge_exist(_local, _remote, dev_links):
