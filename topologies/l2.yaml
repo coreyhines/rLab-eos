@@ -1,18 +1,18 @@
 topology:
   name: L2
   vforward: 1
-  cvpaddress: 192.168.49.12
-  cvp-key: rob-lab
+  cvpaddress: 10.0.5.107
+  cvp-key: arista123
 infra:
-  bridge: vmgmt
-  gateway: 192.168.50.1
+  bridge: br0
+  gateway: 10.0.3.1
 images:
-  ceos: 4.25.0F
+  ceos: 4.26.1F
   host: 0.5
 nodes:
   spine1:
-    mac: 00:1c:73:b0:c6:01
-    ipaddress: 192.168.50.21
+    mac: 00:1c:73:c0:c6:01
+    ipaddress: 10.0.3.22
     neighbors:
       - neighborDevice: spine2
         neighborPort: Ethernet1
@@ -27,8 +27,8 @@ nodes:
         neighborPort: Ethernet1
         port: Ethernet4
   spine2:
-    mac: 00:1c:73:b1:c6:01
-    ipaddress: 192.168.50.22
+    mac: 00:1c:73:c1:c6:02
+    ipaddress: 10.0.3.23
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet1
@@ -43,8 +43,8 @@ nodes:
         neighborPort: Ethernet2
         port: Ethernet4
   leaf1:
-    mac: 00:1c:73:b2:c6:01
-    ipaddress: 192.168.50.23
+    mac: 00:1c:73:c2:c6:03
+    ipaddress: 10.0.3.24
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet2
@@ -59,8 +59,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet4
   leaf2:
-    mac: 00:1c:73:b3:c6:01
-    ipaddress: 192.168.50.24
+    mac: 00:1c:73:c3:c6:04
+    ipaddress: 10.0.3.25
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet3
@@ -75,8 +75,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet4
   leaf3:
-    mac: 00:1c:73:b4:c6:01
-    ipaddress: 192.168.50.25
+    mac: 00:1c:73:c4:c6:05
+    ipaddress: 10.0.3.26
     neighbors:
       - neighborDevice: spine1
         neighborPort: Ethernet4

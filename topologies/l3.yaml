@@ -1,17 +1,18 @@
 topology:
   name: L3
-  forward: 1
-  cvpaddress: 192.168.49.12
-  cvp-key: rob-lab
+  vforward: 1
+  cvpaddress: 10.0.5.107
+  cvp-key: arista123
 infra:
-  bridge: vmgmt
-  gateway: 192.168.50.1
+  bridge: br0
+  gateway: 10.0.3.1
 images:
-  ceos: 4.25.0F
+  ceos: 4.26.1F
   host: 0.5
 nodes:
   spine1:
-    mac: 00:1c:73:c0:c6:01
+    mac: 00:1c:73:c0:c6:06
+    ipaddress: 10.0.3.27
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet2
@@ -38,7 +39,8 @@ nodes:
         neighborPort: Ethernet2
         port: Ethernet8
   spine2:
-    mac: 00:1c:73:c1:c6:01
+    mac: 00:1c:73:c1:c6:07
+    ipaddress: 10.0.3.28
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet3
@@ -65,7 +67,8 @@ nodes:
         neighborPort: Ethernet3
         port: Ethernet8
   leaf11:
-    mac: 00:1c:73:c2:c6:01
+    mac: 00:1c:73:c2:c6:08
+    ipaddress: 10.0.3.29
     neighbors:
       - neighborDevice: leaf12
         neighborPort: Ethernet1
@@ -83,7 +86,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet5
   leaf12:
-    mac: 00:1c:73:c3:c6:01
+    mac: 00:1c:73:c3:c6:09
+    ipaddress: 10.0.3.30
     neighbors:
       - neighborDevice: leaf11
         neighborPort: Ethernet1
@@ -95,7 +99,8 @@ nodes:
         neighborPort: Ethernet2
         port: Ethernet3
   leaf21:
-    mac: 00:1c:73:c4:c6:01
+    mac: 00:1c:73:c4:c6:0a
+    ipaddress: 10.0.3.31
     neighbors:
       - neighborDevice: leaf22
         neighborPort: Ethernet1
@@ -110,7 +115,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet4
   leaf22:
-    mac: 00:1c:73:c5:c6:01
+    mac: 00:1c:73:c5:c6:0b
+    ipaddress: 10.0.3.32
     neighbors:
       - neighborDevice: leaf21
         neighborPort: Ethernet1
@@ -125,7 +131,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet4
   leaf31:
-    mac: 00:1c:73:c6:c6:01
+    mac: 00:1c:73:c6:c6:0c
+    ipaddress: 10.0.3.33
     neighbors:
       - neighborDevice: leaf32
         neighborPort: Ethernet1
@@ -143,7 +150,8 @@ nodes:
         neighborPort: Ethernet0
         port: Ethernet5
   leaf32:
-    mac: 00:1c:73:c7:c6:01
+    mac: 00:1c:73:c7:c6:0d
+    ipaddress: 10.0.3.34
     neighbors:
       - neighborDevice: leaf31
         neighborPort: Ethernet1
@@ -155,7 +163,8 @@ nodes:
         neighborPort: Ethernet6
         port: Ethernet3
   brdr1:
-    mac: 00:1c:73:c8:c6:01
+    mac: 00:1c:73:c8:c6:0e
+    ipaddress: 10.0.3.35
     neighbors:
       - neighborDevice: brdr2
         neighborPort: Ethernet1
@@ -167,7 +176,8 @@ nodes:
         neighborPort: Ethernet7
         port: Ethernet3
   brdr2:
-    mac: 00:1c:73:c9:c6:01
+    mac: 00:1c:73:c9:c6:0f
+    ipaddress: 10.0.3.36
     neighbors:
       - neighborDevice: brdr1
         neighborPort: Ethernet1

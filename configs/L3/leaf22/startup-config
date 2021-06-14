@@ -1,30 +1,94 @@
-! Startup-config last modified at  Thu Nov 14 16:19:31 2019 by root
-! device: L3-L22 (cEOSLab, EOS-4.22.1F-13254911.regmiceoslab40 (engineering build))
+! Startup-config last modified at Wed May 12 15:58:42 2021 by corey
+! device: l3-l22 (cEOSLab, EOS-4.26.0F-21792469.4260F (engineering build))
 !
-event-monitor
+alias conint sh interface | I connected
+alias dump bash tcpdump -i %1
+alias findmac bash sudo ip netns exec ns-mgmt /mnt/flash/Scripts/locateMac.py %1
+alias routeage bash echo 'show ip route' | cliribd
+alias scp bash sudo ip netns exec ns-mgmt scp
+alias senz show interface counter error | nz
+alias shmc show int | awk '/^[A-Z]/ { intf = $1 } /, address is/ { print intf, $6 }'
+alias shvxaddr show vxlan address-table
+alias snz show interface counter | nz
+alias spd show port-channel %1 detail all
+alias sqnz show interface counter queue | nz
+alias srnz show interface counter rate | nz
+!
+alias reTerminAttr
+   10 configure terminal
+   20 daemon TerminAttr
+   30 shut
+   40 no shut
+   50 exit
 !
 schedule tech-support interval 60 timeout 30 max-log-files 5 command show tech-support
 !
+daemon TerminAttr
+   exec /usr/bin/TerminAttr -cvopt cvp07.addr=10.0.5.107:9910 -cvopt cvp07.auth=key,arista123 -cvopt cvp07.vrf=mgmt -cvopt cvp08.addr=10.0.5.108:9910 -cvopt cvp08.auth=key,arista123 -cvopt cvp08.vrf=mgmt -cvcompression=gzip -smashexcludes=ale,flexCounter,hardware,kni,pulse,strata -ingestexclude=/Sysdb/cell/1/agent,/Sysdb/cell/2/agent -taillogs
+   no shutdown
+!
+email
+   from-user l3-l22@rightworkrightmachine.com
+   server vrf mgmt smtp.gmail.com:587
+   auth username corey@coreyhines.com
+   auth password 7 5NTwaIvI34OuAeuEhuOLHB/k1avtK/Bf
+   tls
+!
+event-monitor
+!
+load-interval default 5
+!
 transceiver qsfp default-mode 4x10G
 !
-service routing protocols model multi-agent
+service routing protocols model ribd
 !
 agent Bfd shutdown
 !
-hostname L3-L22
+logging vrf mgmt host logger.freeblizz.com 514
+logging source-interface Management0
+!
+hostname l3-l22
+ip name-server vrf mgmt 10.0.2.3
+ip name-server vrf mgmt 10.0.3.5
+dns domain freeblizz.com
+!
+ntp local-interface vrf mgmt Management0
+ntp server vrf mgmt 10.0.2.3 prefer iburst
+ntp server vrf mgmt 10.0.3.5 iburst
+!
+radius-server host rad.freeblizz.com vrf mgmt key 7 03065405035770141F
+!
+aaa group server radius RADCLIENT
+   !! server pi3.freeblizz.com vrf mgmt
+   !! server pi2.freeblizz.com vrf mgmt
+   !! radius-server host pi3.freeblizz.com vrf mgmt key 7 03065405035770141F
+   !! radius-server host pi2.freeblizz.com vrf mgmt key 7 03065405035770141F
+   server rad.freeblizz.com vrf mgmt
+!
+snmp-server location minneapolis
+snmp-server vrf mgmt local-interface Management0
+snmp-server community br0b0ts ro
+snmp-server user observium observium v2c
+snmp-server enable traps
+snmp-server vrf mgmt
 !
 spanning-tree mode mstp
 no spanning-tree vlan-id 4094
 !
+aaa authentication login default group RADCLIENT local
 aaa authentication login console local
-aaa authorization exec default local
+aaa authorization exec default group RADCLIENT local
 aaa authorization commands all default local
 !
 no aaa root
 !
+username admin privilege 15 role network-admin secret sha512 $6$oPOCRlIw$RYcGUI0HFC.xIjpJLZgVXn6a1tA4sisXVreUSUBAINewKcxrASWtUWPKFSvZ/EhiHt.f7tjq7m4Qt2bPg58Fq/
+username admin ssh-key ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOW9OOfVthdVCS6xnKldUtf8eIbwg+VKCvzLSsp2NWiB
 username arista privilege 15 role network-admin secret sha512 $6$1WX5awmOhAFOXqKe$QGxPTq59tg4eu5BbTlOe9QuJYVnq6.9CbzG45g1yXKWS5zUOwGXGrvE249Lf9VXZ4MctVGZfXxy5RKTXIG/Xw/
+username arista ssh-key ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOW9OOfVthdVCS6xnKldUtf8eIbwg+VKCvzLSsp2NWiB
+username cvpadmin privilege 15 role network-admin secret sha512 $6$mzFjLuTd$iucrcl8IbCARYqDF.vmiUd9tq9pzfxLlJG6JdBVcmymZQqCBTBDPG0XqhKs69ylW2.v3Q6Jsq9o8I0RjbxXfl0
 !
-clock timezone CST6CDT
+clock timezone US/Central
 !
 vlan 12
    name VLAN-12
@@ -43,9 +107,7 @@ vrf instance LAB
    description LAB-VRF
    rd 100:101
 !
-vrf instance MGMT
-   description MGMT-VRF
-   rd 100:100
+vrf instance mgmt
 !
 interface Port-Channel1
    switchport mode trunk
@@ -57,11 +119,11 @@ interface Ethernet1
 !
 interface Ethernet2
    no switchport
-   ip address 10.0.1.7/31
+   ip address 10.0.111.7/31
 !
 interface Ethernet3
    no switchport
-   ip address 10.0.2.7/31
+   ip address 10.0.112.7/31
 !
 interface Ethernet4
    description Host22
@@ -73,10 +135,11 @@ interface Loopback0
 interface Loopback1
    ip address 10.0.255.3/32
 !
-interface Management1
-   description Management
-   vrf MGMT
-   ip address 192.168.50.221/24
+interface Management0
+   vrf mgmt
+   ip address 10.0.3.32/24
+   ipv6 enable
+   ipv6 address 2601:443:480:4f53::32/64
 !
 interface Vlan4093
    ip address 10.0.253.3/31
@@ -92,11 +155,14 @@ interface Vxlan1
    vxlan vlan 12 vni 100012
    vxlan vlan 13 vni 100013
 !
-ip route vrf MGMT 0.0.0.0/0 192.168.50.1
+event-handler config-versioning
+   trigger on-startup-config
+   action bash FN=/mnt/flash/startup-config; LFN="`ls -1 $FN.*-* | tail -n 1`"; if [ -z "$LFN" -o -n "`diff -I 'last modified' $FN $LFN`" ]; then cp $FN $FN.`date +%Y%m%d-%H%M%S`; ls -1r $FN.*-* | tail -n +11 | xargs -I % rm %; fi
+   delay 0
 !
 ip routing
-ip routing vrf LAB
-ip routing vrf MGMT
+no ip routing vrf LAB
+no ip routing vrf mgmt
 !
 ip prefix-list underlay-out
    seq 10 permit 10.0.255.0/24 le 32
@@ -108,7 +174,11 @@ mlag configuration
    peer-address 10.0.0.1
    peer-link Port-Channel1
 !
-ip radius vrf MGMT source-interface Management1
+ip route vrf mgmt 0.0.0.0/0 10.0.3.1
+!
+ipv6 route vrf mgmt ::/0 2601:443:480:4f53::1
+!
+ip radius vrf mgmt source-interface Management0
 !
 route-map rm-underlay-out permit 10
    match ip address prefix-list underlay-out
@@ -129,8 +199,8 @@ router bgp 65002
    neighbor SPINE-EVPN maximum-routes 0
    neighbor 10.0.0.1 remote-as 65002
    neighbor 10.0.0.1 maximum-routes 12000
-   neighbor 10.0.1.6 peer group SPINE
-   neighbor 10.0.2.6 peer group SPINE
+   neighbor 10.0.111.6 peer group SPINE
+   neighbor 10.0.112.6 peer group SPINE
    neighbor 10.0.254.1 peer group SPINE-EVPN
    neighbor 10.0.254.2 peer group SPINE-EVPN
    redistribute connected
@@ -155,10 +225,10 @@ management api http-commands
    protocol unix-socket
    no shutdown
    !
-   vrf MGMT
+   vrf default
       no shutdown
    !
-   vrf default
+   vrf mgmt
       no shutdown
 !
 end

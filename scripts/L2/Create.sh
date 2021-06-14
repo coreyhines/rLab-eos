@@ -1,7 +1,7 @@
 #!/bin/bash
-if [ "$(docker image ls | grep ceosimage | grep -c 4.25.0F)" == 0 ]
+if [ "$(docker image ls | grep ceosimage | grep -c 4.26.1F)" == 0 ]
 then
-    echo "Docker image not found for ceosimage:4.25.0F, please build it first."
+    echo "Docker image not found for ceosimage:4.26.1F, please build it first."
     exit
 fi
 if [ "$(docker image ls | grep chost | grep -c 0.5)" == 0 ]
@@ -29,12 +29,12 @@ sudo ip link add l2leaf3et4 type veth peer name l2host31et0
 # Creating anchor containers
 #
 # Checking to make sure topo config directory exists
-if ! [ -d "/workspaces/rLab-eos/configs/L2" ]; then mkdir /workspaces/rLab-eos/configs/L2; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2" ]; then mkdir /home/corey/rLab-eos/configs/L2; fi
 # Checking for configs directory for each cEOS node
-if ! [ -d "/workspaces/rLab-eos/configs/L2/spine1" ]; then mkdir /workspaces/rLab-eos/configs/L2/spine1; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2/spine1" ]; then mkdir /home/corey/rLab-eos/configs/L2/spine1; fi
 # Creating the ceos-config file.
-echo "SERIALNUMBER=l2spine1" > /workspaces/rLab-eos/configs/L2/spine1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c0:c6:01" >> /workspaces/rLab-eos/configs/L2/spine1/ceos-config
+echo "SERIALNUMBER=l2spine1" > /home/corey/rLab-eos/configs/L2/spine1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:c0:c6:01" >> /home/corey/rLab-eos/configs/L2/spine1/ceos-config
 # Getting spine1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2spine1-net --net=none busybox /bin/init
 l2spine1pid=$(docker inspect --format '{{.State.Pid}}' l2spine1-net)
@@ -45,16 +45,16 @@ sudo ip link set l2spine1et2 netns l2spine1 name et2 up
 sudo ip link set l2spine1et3 netns l2spine1 name et3 up
 sudo ip link set l2spine1et4 netns l2spine1 name et4 up
 sudo ip link add l2spine1-eth0 type veth peer name l2spine1-mgmt
-sudo brctl addif vmgmt l2spine1-mgmt
+sudo brctl addif br0 l2spine1-mgmt
 sudo ip link set l2spine1-eth0 netns l2spine1 name eth0 up
 sudo ip link set l2spine1-mgmt up
 sleep 1
-docker run -d --name=l2spine1 --log-opt max-size=1m --net=container:l2spine1-net --ip 192.168.50.21 --privileged -v /workspaces/rLab-eos/configs/L2/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l2spine1 --log-opt max-size=1m --net=container:l2spine1-net --ip 10.0.3.22 --privileged -v /home/corey/rLab-eos/configs/L2/spine1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.26.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
-if ! [ -d "/workspaces/rLab-eos/configs/L2/spine2" ]; then mkdir /workspaces/rLab-eos/configs/L2/spine2; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2/spine2" ]; then mkdir /home/corey/rLab-eos/configs/L2/spine2; fi
 # Creating the ceos-config file.
-echo "SERIALNUMBER=l2spine2" > /workspaces/rLab-eos/configs/L2/spine2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c1:c6:01" >> /workspaces/rLab-eos/configs/L2/spine2/ceos-config
+echo "SERIALNUMBER=l2spine2" > /home/corey/rLab-eos/configs/L2/spine2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:c1:c6:02" >> /home/corey/rLab-eos/configs/L2/spine2/ceos-config
 # Getting spine2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2spine2-net --net=none busybox /bin/init
 l2spine2pid=$(docker inspect --format '{{.State.Pid}}' l2spine2-net)
@@ -65,16 +65,16 @@ sudo ip link set l2spine2et2 netns l2spine2 name et2 up
 sudo ip link set l2spine2et3 netns l2spine2 name et3 up
 sudo ip link set l2spine2et4 netns l2spine2 name et4 up
 sudo ip link add l2spine2-eth0 type veth peer name l2spine2-mgmt
-sudo brctl addif vmgmt l2spine2-mgmt
+sudo brctl addif br0 l2spine2-mgmt
 sudo ip link set l2spine2-eth0 netns l2spine2 name eth0 up
 sudo ip link set l2spine2-mgmt up
 sleep 1
-docker run -d --name=l2spine2 --log-opt max-size=1m --net=container:l2spine2-net --ip 192.168.50.22 --privileged -v /workspaces/rLab-eos/configs/L2/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l2spine2 --log-opt max-size=1m --net=container:l2spine2-net --ip 10.0.3.23 --privileged -v /home/corey/rLab-eos/configs/L2/spine2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.26.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
-if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf1" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf1; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2/leaf1" ]; then mkdir /home/corey/rLab-eos/configs/L2/leaf1; fi
 # Creating the ceos-config file.
-echo "SERIALNUMBER=l2leaf1" > /workspaces/rLab-eos/configs/L2/leaf1/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c2:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf1/ceos-config
+echo "SERIALNUMBER=l2leaf1" > /home/corey/rLab-eos/configs/L2/leaf1/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:c2:c6:03" >> /home/corey/rLab-eos/configs/L2/leaf1/ceos-config
 # Getting leaf1 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf1-net --net=none busybox /bin/init
 l2leaf1pid=$(docker inspect --format '{{.State.Pid}}' l2leaf1-net)
@@ -85,16 +85,16 @@ sudo ip link set l2leaf1et2 netns l2leaf1 name et2 up
 sudo ip link set l2leaf1et3 netns l2leaf1 name et3 up
 sudo ip link set l2leaf1et4 netns l2leaf1 name et4 up
 sudo ip link add l2leaf1-eth0 type veth peer name l2leaf1-mgmt
-sudo brctl addif vmgmt l2leaf1-mgmt
+sudo brctl addif br0 l2leaf1-mgmt
 sudo ip link set l2leaf1-eth0 netns l2leaf1 name eth0 up
 sudo ip link set l2leaf1-mgmt up
 sleep 1
-docker run -d --name=l2leaf1 --log-opt max-size=1m --net=container:l2leaf1-net --ip 192.168.50.23 --privileged -v /workspaces/rLab-eos/configs/L2/leaf1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l2leaf1 --log-opt max-size=1m --net=container:l2leaf1-net --ip 10.0.3.24 --privileged -v /home/corey/rLab-eos/configs/L2/leaf1:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.26.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
-if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf2" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf2; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2/leaf2" ]; then mkdir /home/corey/rLab-eos/configs/L2/leaf2; fi
 # Creating the ceos-config file.
-echo "SERIALNUMBER=l2leaf2" > /workspaces/rLab-eos/configs/L2/leaf2/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c3:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf2/ceos-config
+echo "SERIALNUMBER=l2leaf2" > /home/corey/rLab-eos/configs/L2/leaf2/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:c3:c6:04" >> /home/corey/rLab-eos/configs/L2/leaf2/ceos-config
 # Getting leaf2 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf2-net --net=none busybox /bin/init
 l2leaf2pid=$(docker inspect --format '{{.State.Pid}}' l2leaf2-net)
@@ -105,16 +105,16 @@ sudo ip link set l2leaf2et2 netns l2leaf2 name et2 up
 sudo ip link set l2leaf2et3 netns l2leaf2 name et3 up
 sudo ip link set l2leaf2et4 netns l2leaf2 name et4 up
 sudo ip link add l2leaf2-eth0 type veth peer name l2leaf2-mgmt
-sudo brctl addif vmgmt l2leaf2-mgmt
+sudo brctl addif br0 l2leaf2-mgmt
 sudo ip link set l2leaf2-eth0 netns l2leaf2 name eth0 up
 sudo ip link set l2leaf2-mgmt up
 sleep 1
-docker run -d --name=l2leaf2 --log-opt max-size=1m --net=container:l2leaf2-net --ip 192.168.50.24 --privileged -v /workspaces/rLab-eos/configs/L2/leaf2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l2leaf2 --log-opt max-size=1m --net=container:l2leaf2-net --ip 10.0.3.25 --privileged -v /home/corey/rLab-eos/configs/L2/leaf2:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.26.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Checking for configs directory for each cEOS node
-if ! [ -d "/workspaces/rLab-eos/configs/L2/leaf3" ]; then mkdir /workspaces/rLab-eos/configs/L2/leaf3; fi
+if ! [ -d "/home/corey/rLab-eos/configs/L2/leaf3" ]; then mkdir /home/corey/rLab-eos/configs/L2/leaf3; fi
 # Creating the ceos-config file.
-echo "SERIALNUMBER=l2leaf3" > /workspaces/rLab-eos/configs/L2/leaf3/ceos-config
-echo "SYSTEMMACADDR=00:1c:73:c4:c6:01" >> /workspaces/rLab-eos/configs/L2/leaf3/ceos-config
+echo "SERIALNUMBER=l2leaf3" > /home/corey/rLab-eos/configs/L2/leaf3/ceos-config
+echo "SYSTEMMACADDR=00:1c:73:c4:c6:05" >> /home/corey/rLab-eos/configs/L2/leaf3/ceos-config
 # Getting leaf3 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2leaf3-net --net=none busybox /bin/init
 l2leaf3pid=$(docker inspect --format '{{.State.Pid}}' l2leaf3-net)
@@ -125,11 +125,11 @@ sudo ip link set l2leaf3et2 netns l2leaf3 name et2 up
 sudo ip link set l2leaf3et3 netns l2leaf3 name et3 up
 sudo ip link set l2leaf3et4 netns l2leaf3 name et4 up
 sudo ip link add l2leaf3-eth0 type veth peer name l2leaf3-mgmt
-sudo brctl addif vmgmt l2leaf3-mgmt
+sudo brctl addif br0 l2leaf3-mgmt
 sudo ip link set l2leaf3-eth0 netns l2leaf3 name eth0 up
 sudo ip link set l2leaf3-mgmt up
 sleep 1
-docker run -d --name=l2leaf3 --log-opt max-size=1m --net=container:l2leaf3-net --ip 192.168.50.25 --privileged -v /workspaces/rLab-eos/configs/L2/leaf3:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.25.0F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
+docker run -d --name=l2leaf3 --log-opt max-size=1m --net=container:l2leaf3-net --ip 10.0.3.26 --privileged -v /home/corey/rLab-eos/configs/L2/leaf3:/mnt/flash:Z -e INTFTYPE=et -e MGMT_INTF=eth0 -e ETBA=1 -e SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 -e CEOS=1 -e EOS_PLATFORM=ceoslab -e container=docker -i -t ceosimage:4.26.1F /sbin/init systemd.setenv=INTFTYPE=et systemd.setenv=MGMT_INTF=eth0 systemd.setenv=ETBA=1 systemd.setenv=SKIP_ZEROTOUCH_BARRIER_IN_SYSDBINIT=1 systemd.setenv=CEOS=1 systemd.setenv=EOS_PLATFORM=ceoslab systemd.setenv=container=docker
 # Getting host10 nodes plumbing
 docker run -d --restart=always --log-opt max-size=10k --name=l2host10-net --net=none busybox /bin/init
 l2host10pid=$(docker inspect --format '{{.State.Pid}}' l2host10-net)
