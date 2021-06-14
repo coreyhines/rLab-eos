@@ -6,6 +6,8 @@ from ruamel.yaml import YAML
 import argparse
 
 BASE_PATH = getcwd()
+loop = False
+looped = ""
 
 def openTopo(topo):
     try:
@@ -24,6 +26,10 @@ def checkedge_exist(_local, _remote, dev_links):
             return True
     return False
 
+def checkedge_loop(_local, _remote):
+    if _local == _remote:
+        return True
+    return False
 
 def create_topo(root, neigh_list):
     nodes = []
@@ -34,10 +40,14 @@ def create_topo(root, neigh_list):
         for _neigh in _node['neighbors']:
             _local = _node['name'] + _neigh['port']
             _remote = _neigh['neighborDevice'] + _neigh['neighborPort']
+            if checkedge_loop(_node['name'], _neigh['neighborDevice']):
+                global looped
+                looped = _node['name']
+            else:
+                loop = False
             if not checkedge_exist(_local, _remote, dev_links):
                 edges.append([_node['name'], _neigh['neighborDevice'], _neigh['neighborPort'] + "-" + _neigh['port']])
                 dev_links.append(_local + "-" + _remote)
-        #edges.append([root, neighbor['neighborDevice'], neighbor['neighborPort'] + "-" + neighbor['port'] ])
     return [nodes, edges]
 
 def make_topology(network_name, mytopo):
@@ -48,7 +58,8 @@ def make_topology(network_name, mytopo):
     #dot.attr('node', image="./images/image.png")
     dot.attr('edge', weight='10')
     dot.attr('edge', arrowhead='none')
-    #dot.body.append(r'label = "\n\nMy Prettier Network Diagram w/ straight edges"')
+    if looped:
+        dot.body.append(rf'label = "\n\n LOOP ALERT!\nCHECK YOUR TOPO YAML.\nNode: {looped} is connected to itself"')
     dot.body.append('fontsize=20')
     dot.engine = 'fdp'
     for i in mytopo[0]:
