@@ -5,12 +5,13 @@ This repo will contain the data models and configs to build different toplogies 
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
-- `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory. 
+- `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory.
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
 - `configs/{topo}/{device}` - This directory structure is were any files you want to be loaded into cEOS-lab's `/mnt/flash` should be loaded to.  Scripts, startup-config etc.
 
 The Following Python package libraries need to be loaded on the machine that will run `topo-builder.py`:
 - ruamel.yaml
+- graphviz
 
 To run the network topology on a container host machine, you can leverage the following cEOS_host_build Ansible-Playbook to build the environment.  This will install all necessary software to run cEOS-lab. It is located in the following repo:
 
@@ -68,14 +69,14 @@ commands:
 - The `CVP_KEY` parameter is optional, this is if a bare startup-config is created and the device should start streaming to CVP.
 - The `MGMT_BRIDGE` parameter is optional, this is if you wish to attach the cEOS containers Management0 Interface to this network.
 - The `MGMT_NETWORK_GATEWAY` parameter is optional, this is if a bare startup-config is created, but should be specified if the `MGMT_BRIDGE` parameter is set.
-- The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.  
+- The `mac` section for each cEOS-lab node needs to be unique, this helps specify the correct system-id in cEOS so MLAG will function properly.
 - The `neighbors` section for each cEOS-lab node is a mapping to the remote peer and which interfaces to connect.
 - If you do not want to run iperf on the host nodes, you can leave that section empty and only set `iperf:`
 - The `commands:` section can create additional bash scripts to load new configurations on the nodes.  The `topologies/ratd.yaml` file has examples for this.
 
 ## Creating a Topology
 
-Clone this repo to your container host node and enter the main directory for this repo.  
+Clone this repo to your container host node and enter the main directory for this repo.
 
 Here are the steps required to get it running for the first time.
 
@@ -116,7 +117,7 @@ or
 build/topo-builder.py -t {topo} -s
 ```
 
-4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.  
+4. The `topo-builder.py` script will create a minimum of 4 bash scripts.  They are located in `scripts/{TOPO_NAME}/`.  It is important to run the commands for the project directories top-level directory.
 The four main scripts created are as follows with their description:
 - `Create.sh` - Creates all Open vSwitch bridges, containers, starts containers and links all containers together.
 - `Start.sh` - Starts all stopped containers and links all containers together.
