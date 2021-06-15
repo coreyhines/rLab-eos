@@ -7,6 +7,7 @@ import argparse
 
 BASE_PATH = getcwd()
 looped = []
+dooped = []
 
 def openTopo(topo):
     try:
@@ -30,9 +31,15 @@ def checkedge_loop(_local, _remote):
         return True
     return False
 
+def checkedge_reused_remote(_remote, _remote_seen):
+    if _remote in _remote_seen:
+        return True
+    return False
+
 def create_topo(root, neigh_list):
     nodes = []
     edges = []
+    remotes_seen = []
     dev_links = []
     for _node in neigh_list:
         nodes.append(_node['name'])
@@ -44,22 +51,29 @@ def create_topo(root, neigh_list):
                 looped.append(_node['name'])
             else:
                 loop = False
+            if checkedge_reused_remote(_remote, remotes_seen):
+                global dooped
+                dooped.append([_node['name'], _remote])
+                print (f'iBerg! {_remote}')
             if not checkedge_exist(_local, _remote, dev_links):
                 edges.append([_node['name'], _neigh['neighborDevice'], _neigh['neighborPort'] + "-" + _neigh['port']])
                 dev_links.append(_local + "-" + _remote)
+                remotes_seen.append(_remote)
     return [nodes, edges]
 
 def make_topology(network_name, mytopo):
     dot = Digraph(comment=network_name, format='png')
     #dot.graph_attr['splines'] = "ortho"
-    dot.attr('node', shape='box')
-    #dot.attr('node', image="./images/switch1.png")
-    #dot.attr('node', image="./images/image.png")
-    dot.attr('edge', weight='10')
+    dot.attr('node', shape='none', overlap='false', fontsize='55', fontcolor='black', labelloc='b')
+    dot.attr('node', image=BASE_PATH + "/images/switch.png")
+    dot.attr('edge', penwidth='2')
     dot.attr('edge', arrowhead='none')
     if looped:
-        dot.body.append(rf'label = "\n\n LOOP ALERT!\nCHECK YOUR TOPO YAML.\nNode: {looped} is connected to itself"')
-    dot.body.append('fontsize=20')
+        dot.body.append(rf'label = "\n\n Looped connection ALERT!\nCHECK YOUR TOPO YAML.\nNode: {looped} is connected to itself"')
+    if dooped:
+        dot.body.append(rf'label = "\n\n Duped connection ALERT!\nCHECK YOUR TOPO YAML.\nNode: {dooped} are being reused"')
+
+    dot.body.append('fontsize=40')
     dot.engine = 'fdp'
     for i in mytopo[0]:
         dot.node(i)
@@ -77,7 +91,7 @@ def main(args):
     my_topo = create_topo(topo['topology']['name'], nodes)
     dot = Digraph(comment='My Network')
 
-    dot = make_topology("My New Network", my_topo)
+    dot = make_topology(topo['topology']['name'], my_topo)
     dot.render(filename=args.topo, directory=BASE_PATH + "/topologies", cleanup=True)
 
 if __name__ == '__main__':
