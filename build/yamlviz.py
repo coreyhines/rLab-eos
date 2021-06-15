@@ -26,10 +26,11 @@ def checkedge_exist(_local, _remote, dev_links):
             return True
     return False
 
-def checkedge_loop(_local, _remote):
-    if _local == _remote:
-        return True
-    return False
+# Deprecated, function not used, wait to delete
+#def checkedge_loop(_local, _remote):
+#    if _local == _remote:
+#        return True
+#    return False
 
 def checkedge_reused_remote(_remote, _remote_seen):
     if _remote in _remote_seen:
@@ -46,11 +47,6 @@ def create_topo(root, neigh_list):
         for _neigh in _node['neighbors']:
             _local = _node['name'] + _neigh['port']
             _remote = _neigh['neighborDevice'] + _neigh['neighborPort']
-            if checkedge_loop(_node['name'], _neigh['neighborDevice']):
-                global looped
-                looped.append(_node['name'])
-            else:
-                loop = False
             if checkedge_reused_remote(_remote, remotes_seen):
                 global dooped
                 dooped.append([_node['name'], _remote])
