@@ -1,4 +1,4 @@
 .gitignore
 .history
-*.png
 .DS_Store
+topologies/*.png
