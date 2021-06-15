@@ -49,7 +49,7 @@ def create_topo(root, neigh_list):
             _remote = _neigh['neighborDevice'] + _neigh['neighborPort']
             if checkedge_reused_remote(_remote, remotes_seen):
                 global dooped
-                dooped.append([_node['name'], _remote])
+                dooped.append([_neigh['neighborDevice'], _remote])
                 print (f'iBerg! {_remote}')
             if not checkedge_exist(_local, _remote, dev_links):
                 edges.append([_node['name'], _neigh['neighborDevice'], _neigh['neighborPort'] + "-" + _neigh['port']])
@@ -59,22 +59,31 @@ def create_topo(root, neigh_list):
 
 def make_topology(network_name, mytopo):
     dot = Digraph(comment=network_name, format='png')
-    #dot.graph_attr['splines'] = "ortho"
+    dot.attr('graph', fontname='Verdana', K='3.6')
     dot.attr('node', shape='none', overlap='false', fontsize='55', fontcolor='black', labelloc='b')
     dot.attr('node', image=BASE_PATH + "/images/switch.png")
     dot.attr('edge', penwidth='2')
     dot.attr('edge', arrowhead='none')
-    if looped:
-        dot.body.append(rf'label = "\n\n Looped connection ALERT!\nCHECK YOUR TOPO YAML.\nNode: {looped} is connected to itself"')
     if dooped:
-        dot.body.append(rf'label = "\n\n Duped connection ALERT!\nCHECK YOUR TOPO YAML.\nNode: {dooped} are being reused"')
+        dot.body.append(rf'label = "\nDuped connection ALERT!\nCHECK YOUR TOPO YAML.\nConnection: {dooped} are being reused"')
 
     dot.body.append('fontsize=40')
     dot.engine = 'fdp'
     for i in mytopo[0]:
         dot.node(i)
     for i in mytopo[1]:
-        dot.edge(i[0], i[1])
+        head = "Eth"+ i[2].split("-")[0].split("ernet")[1]
+        tail = "Eth" + i[2].split("-")[1].split("ernet")[1]
+        if "host" in i[1]:
+            dot.node(i[1], imagesscale='true', image=BASE_PATH + "/images/linux.png", labelloc='t') 
+        if dooped:
+            if i[1] in str(dooped).split(",")[1]:
+                dot.edge(i[0], i[1], headlabel=head, taillabel=tail, fontcolor='red', color='red', penwidth='4', labelfontsize='20')
+                dot.node(i[1], fontcolor='red', color='red', shape='box', fontsize='65')
+            else:
+                dot.edge(i[0], i[1], headlabel=head, taillabel=tail, labelfontsize='20')
+        else:
+            dot.edge(i[0], i[1], headlabel=head, taillabel=tail, labelfontsize='20')
     return dot
 
 
