@@ -5,11 +5,7 @@ This repo will contain the data models and configs to build different toplogies 
 ### Getting Started
 To build a new topology, the following files/data structures need to be created.
 - `topologies/{name}.yaml` - This file is leveraged by `build/topo-builder.py` to create the necessary commands to build the topology.
-<<<<<<< HEAD
 - `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory. 
-=======
-- `build/yamlviz.py` This script will draw a cabling diagram of your topology. It writes a PNG image named after your topology in the `topologies/` directory.
->>>>>>> 3dd6ea84ac57835c0c29a362d98489b485d31d4b
 - `build/topo-build.sh` This is a wrapper script that calls both `build/topo-builder.py` and `build/yamlviz.py`
 - `configs/{topo}/{device}` - This directory structure is were any files you want to be loaded into cEOS-lab's `/mnt/flash` should be loaded to.  Scripts, startup-config etc.
 
