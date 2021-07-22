@@ -73,6 +73,10 @@ def make_topology(network_name, mytopo):
     if dooped:
         dot.body.append(
             rf'label = "\nDuped connection ALERT!\nCHECK YOUR TOPO YAML.\nConnection: {dooped} are being reused"')
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3dd6ea84ac57835c0c29a362d98489b485d31d4b
     dot.body.append('fontsize=40')
     dot.engine = 'fdp'
     for i in mytopo[0]:
@@ -104,11 +108,19 @@ def main(args):
     for node in topo['nodes']:
         nodes.append(
             {'name': node, 'neighbors': topo['nodes'][node]['neighbors']})
+<<<<<<< HEAD
     topo_name = str(topo['topology']['name'])
     my_topo = create_topo(topo_name, nodes)
     dot = Digraph(comment=topo_name)
 
     dot = make_topology(topo_name, my_topo)
+=======
+
+    my_topo = create_topo(topo['topology']['name'], nodes)
+    dot = Digraph(comment=topo['topology']['name'])
+
+    dot = make_topology(topo['topology']['name'], my_topo)
+>>>>>>> 3dd6ea84ac57835c0c29a362d98489b485d31d4b
     dot.render(filename=args.topo, directory=BASE_PATH +
                "/topologies", cleanup=True)
 
