@@ -11,6 +11,7 @@ import ssl
 import yaml
 import random
 import pprint
+import re
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -61,7 +62,8 @@ def get_topology_info():
 
         # Create Infra Key Information
         # Bridge will be left default for now
-        topology_info['infra']['bridge'] = 'vmgmt'
+        topology_info['infra']['bridge'] = input(
+            'Please enter the bridge way for your management network: ')
         topology_info['infra']['gateway'] = input(
             'Please enter the default gateway for your management network: ')
         _username = input(
@@ -123,9 +125,11 @@ def main():
             username, password, hoststrip)
 
         device_neighbors = []
+        hexPattern = re.compile(r'\s--([0-9a-fA-F]+)(?:--)?\s')
         for neighbor in lldp_neighbors:
             neighbor.pop('ttl', None)
-            device_neighbors.append(neighbor)
+            if neighbor['neighborPort'] != "Management1":
+              device_neighbors.append(neighbor)
 
         topology_info['nodes'][hostname] = {}
         topology_info['nodes'][hostname]['mac'] = '00:1c:73:c{0}:c6:0{1}'.format(
