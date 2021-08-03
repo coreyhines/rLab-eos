@@ -125,10 +125,11 @@ def main():
             username, password, hoststrip)
 
         device_neighbors = []
-        hexPattern = re.compile(r'\s--([0-9a-fA-F]+)(?:--)?\s')
+        hexPattern = re.compile(
+            r'^(?:[0-9A-Fa-f]{4}([.]?))(?:[0-9A-Fa-f]{4}\1){4}[0-9A-Fa-f]{4}|([0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}$')
         for neighbor in lldp_neighbors:
             neighbor.pop('ttl', None)
-            if neighbor['neighborPort'] != "Management1":
+            if neighbor['neighborPort'][:-1] != "Management" and not re.match(hexPattern, neighbor['neighborPort']):
               device_neighbors.append(neighbor)
 
         topology_info['nodes'][hostname] = {}
@@ -145,7 +146,8 @@ def main():
     with open(topology_info['file_name'], 'w+') as topology_write_file:
         topology_info.pop('file_name', None)
         topology_info.pop('topology_id', None)
-        topology_write_file.write(yaml.safe_dump(topology_info))
+        topology_write_file.write(
+            yaml.safe_dump(topology_info, sort_keys=False))
 
     print('File Created.')
 
