@@ -63,7 +63,7 @@ def get_topology_info():
         # Create Infra Key Information
         # Bridge will be left default for now
         topology_info['infra']['bridge'] = input(
-            'Please enter the bridge way for your management network: ')
+            'Please enter the bridge for your management network: ')
         topology_info['infra']['gateway'] = input(
             'Please enter the default gateway for your management network: ')
         _username = input(
@@ -139,6 +139,7 @@ def main():
         topology_info['nodes'][hostname]['ipaddress'] = socket.gethostbyname(
             hoststrip)
         topology_info['iperf'] = {}
+        topology_info['hosts'] = {}
 
         device_count += 1
 
