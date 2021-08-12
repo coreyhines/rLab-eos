@@ -1,6 +1,8 @@
+.gitignore
 .history
 configs/
 .DS_Store
 topologies/*.png
-topologies/hhd*
+topologies/*
 scripts/
+.vscode
