@@ -1,7 +1,3 @@
 ruamel.yaml
-<<<<<<< HEAD
 graphviz
 jsonrpclib
-=======
-graphviz
->>>>>>> 3dd6ea84ac57835c0c29a362d98489b485d31d4b

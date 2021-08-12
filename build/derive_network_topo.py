@@ -8,10 +8,11 @@ from getpass import getpass
 import json
 import urllib3
 import ssl
-import yaml
+from ruamel.yaml import YAML
 import random
 import pprint
 import re
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -130,7 +131,7 @@ def main():
         for neighbor in lldp_neighbors:
             neighbor.pop('ttl', None)
             if neighbor['neighborPort'][:-1] != "Management" and not re.match(hexPattern, neighbor['neighborPort']):
-              device_neighbors.append(neighbor)
+                device_neighbors.append(neighbor)
 
         topology_info['nodes'][hostname] = {}
         topology_info['nodes'][hostname]['mac'] = '00:1c:73:c{0}:c6:0{1}'.format(
@@ -148,7 +149,7 @@ def main():
         topology_info.pop('file_name', None)
         topology_info.pop('topology_id', None)
         topology_write_file.write(
-            yaml.safe_dump(topology_info, sort_keys=False))
+            YAML.safe_dump(topology_info, sort_keys=False))
 
     print('File Created.')
 
